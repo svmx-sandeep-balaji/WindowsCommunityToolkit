@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.ObjectModel;
+using Collections.Generic;
 using Microsoft.Toolkit.Uwp.UI;
 using Windows.UI.Xaml.Controls;
 
@@ -21,8 +22,7 @@ namespace Microsoft.Toolkit.Uwp.SampleApp.SamplePages
 
         private void Setup()
         {
-            // left list
-            var oc = new ObservableCollection<Person>
+            var people = new[]
             {
                 new Person { Name = "Staff" },
                 new Person { Name = "42" },
@@ -42,6 +42,8 @@ namespace Microsoft.Toolkit.Uwp.SampleApp.SamplePages
                 new Person { Name = "8" },
             };
 
+            // left list
+            var oc = new ObservableCollection<Person>(people);
             LeftList.ItemsSource = oc;
 
             // right list
@@ -49,8 +51,12 @@ namespace Microsoft.Toolkit.Uwp.SampleApp.SamplePages
             int nul;
             acv.Filter = x => !int.TryParse(((Person)x).Name, out nul);
             acv.SortDescriptions.Add(new SortDescription("Name", SortDirection.Ascending));
-
             RightList.ItemsSource = acv;
+
+            // datagrid
+            // var vc = new ObservableVector<Person>(people); // This causes exception when adding as itemsource to datagrid: 
+            var vc = acv;
+            Datagrid.ItemsSource = vc;
 
             // add button
             AddButton.Click += (sender, args) =>
@@ -58,6 +64,14 @@ namespace Microsoft.Toolkit.Uwp.SampleApp.SamplePages
                 if (!string.IsNullOrWhiteSpace(NewItemBox.Text))
                 {
                     oc.Add(new Person { Name = NewItemBox.Text });
+                }
+            };
+
+            RemoveButton.Click += (sender, args) =>
+            {
+                if (Datagrid.SelectedItem != null)
+                {
+                    acv.Remove(Datagrid.SelectedItem);
                 }
             };
         }
