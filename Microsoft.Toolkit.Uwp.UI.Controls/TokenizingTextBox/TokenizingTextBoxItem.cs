@@ -94,8 +94,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
-            Focus(FocusState.Pointer);
-
             ClearClicked?.Invoke(this, e);
         }
 

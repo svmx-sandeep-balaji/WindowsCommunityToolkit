@@ -234,7 +234,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             (ContainerFromIndex(newSelectedIndex) as TokenizingTextBoxItem).Focus(FocusState.Keyboard);
         }
 
-        public bool blockIt = false;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "This is a hack to solve a bug in removing tokens - we already have tight Coupling with Parent for Selection control.")]
+        internal bool WorkaroundForTokenRemoval = false;
 
         private async void TokenizingTextBoxItem_ClearClicked(TokenizingTextBoxItem sender, RoutedEventArgs args)
         {
@@ -245,30 +246,17 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             //
             // This workaround places a text value in the last text box before removing the token
             // and then clears the text once its complete.
-            bool workaround = false;
-
             if (string.IsNullOrEmpty(_lastTextEdit.Text))
             {
-                blockIt = true;
-                workaround = true;
+                WorkaroundForTokenRemoval = true;
                 _lastTextEdit.Text = " ";
-                var cont = ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem;
-                if (cont != null)
-                {
-                    cont._autoSuggestBox.IsSuggestionListOpen = false;
-                }
             }
 
             await RemoveTokenAsync(sender);
 
-            if (workaround)
+            if (WorkaroundForTokenRemoval)
             {
                 _lastTextEdit.Text = string.Empty;
-                var cont = ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem;
-                if (cont != null)
-                {
-                    cont._autoSuggestBox.IsSuggestionListOpen = false;
-                }
             }
 
             (ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem)?.Focus(FocusState.Pointer);

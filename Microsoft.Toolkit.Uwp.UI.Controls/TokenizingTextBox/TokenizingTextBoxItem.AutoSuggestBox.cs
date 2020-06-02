@@ -23,8 +23,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
     {
         private const string PART_AutoSuggestBox = "PART_AutoSuggestBox";
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Tight Coupling with Parent for Selection control.")]
-        internal AutoSuggestBox _autoSuggestBox;
+        private AutoSuggestBox _autoSuggestBox;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Tight Coupling with Parent for Selection control.")]
         internal TextBox _autoSuggestTextBox;
@@ -149,12 +148,9 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (Owner.blockIt)
-            {
-                _autoSuggestBox.IsSuggestionListOpen = false;
-                Owner.blockIt = false;
-                return;
-            }
+            // Workaround for item removal visual bug
+            // clear this flag when text changes
+            Owner.WorkaroundForTokenRemoval = false;
 
             var t = sender.Text.Trim();
 
@@ -249,7 +245,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             async void AutoSuggestTextBox_TextChangingAsync(TextBox o, TextBoxTextChangingEventArgs args)
             {
                 // remove any selected tokens.
-                if (Owner.SelectedItems.Count > 1 && !Owner.blockIt)
+                if (Owner.SelectedItems.Count > 1 && !Owner.WorkaroundForTokenRemoval)
                 {
                     await Owner.RemoveAllSelectedTokens();
                 }
