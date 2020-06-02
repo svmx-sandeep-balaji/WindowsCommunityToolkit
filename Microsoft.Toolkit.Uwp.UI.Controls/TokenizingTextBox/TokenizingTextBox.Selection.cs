@@ -234,9 +234,44 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             (ContainerFromIndex(newSelectedIndex) as TokenizingTextBoxItem).Focus(FocusState.Keyboard);
         }
 
+        public bool blockIt = false;
+
         private async void TokenizingTextBoxItem_ClearClicked(TokenizingTextBoxItem sender, RoutedEventArgs args)
         {
+            // The following workaround is required because of this repro:
+            // 1> focus is on the autosuggest text box, no text in the control
+            // 2> Click the remove icon for an existing token
+            // the placeholder text component of the control is not resized correctly
+            //
+            // This workaround places a text value in the last text box before removing the token
+            // and then clears the text once its complete.
+            bool workaround = false;
+
+            if (string.IsNullOrEmpty(_lastTextEdit.Text))
+            {
+                blockIt = true;
+                workaround = true;
+                _lastTextEdit.Text = " ";
+                var cont = ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem;
+                if (cont != null)
+                {
+                    cont._autoSuggestBox.IsSuggestionListOpen = false;
+                }
+            }
+
             await RemoveTokenAsync(sender);
+
+            if (workaround)
+            {
+                _lastTextEdit.Text = string.Empty;
+                var cont = ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem;
+                if (cont != null)
+                {
+                    cont._autoSuggestBox.IsSuggestionListOpen = false;
+                }
+            }
+
+            (ContainerFromItem(_lastTextEdit) as TokenizingTextBoxItem)?.Focus(FocusState.Pointer);
         }
 
         /// <summary>
