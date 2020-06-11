@@ -30,6 +30,8 @@ var inheritDocVersion = "2.5.2";
 var baseDir = MakeAbsolute(Directory("../")).ToString();
 var buildDir = baseDir + "/build";
 var Solution = baseDir + "/Windows Community Toolkit.sln";
+var AppxPackageDir = baseDir + "/Microsoft.Toolkit.Uwp.SampleApp/AppPackages";
+var AppxBundlePlatforms = "x86|x64|ARM|ARM64";
 var toolsDir = buildDir + "/tools";
 
 var binDir = baseDir + "/bin";
@@ -177,6 +179,37 @@ Task("BuildProjects")
 	MSBuild(Solution, buildSettings);
 });
 
+Task("BuildSampleApp")
+    .Description("Build sample app")
+    .Does(() =>
+{
+    RetrieveVersion();
+
+    Information("\nBuilding Sample App");
+    var buildSettings = new MSBuildSettings
+    {
+        MaxCpuCount = 0
+    }
+    .SetConfiguration("Release")
+    .WithTarget("Restore");
+
+    MSBuild(Solution, buildSettings);
+
+    buildSettings = new MSBuildSettings
+    {
+        MaxCpuCount = 0
+    }
+    .SetConfiguration("Release")
+    .SetPlatformTarget(PlatformTarget.x86)
+    .WithTarget("Build")
+    .WithProperty("AppxBundlePlatforms", AppxBundlePlatforms)
+    .WithProperty("AppxPackageDir", AppxPackageDir)
+    .WithProperty("AppxBundle", "Always")
+    .WithProperty("UapAppxPackageBuildMode", "StoreUpload");
+
+    MSBuild(Solution, buildSettings);
+});
+
 Task("InheritDoc")
     .Description("Updates <inheritdoc /> tags from base classes, interfaces, and similar methods")
     .IsDependentOn("BuildProjects")
@@ -311,7 +344,8 @@ Task("Test")
 
 Task("Default")
     .IsDependentOn("Build")
-    .IsDependentOn("Test")
+    .IsDependentOn("BuildSampleApp")
+//    .IsDependentOn("Test")
     .IsDependentOn("Package");
 
 Task("UpdateHeaders")
