@@ -4,12 +4,14 @@
     <Title>Windows Community Toolkit Controls DataGrid</Title>
     <Description>
       This library provides a XAML DataGrid control. It is part of the Windows Community Toolkit.
-                   
+      This library has been forked out for customizations of DataGrid for Servicemax.
     </Description>
     <PackageTags>UWP Toolkit Windows Controls XAML DataGrid</PackageTags>
     <RootNamespace>Microsoft.Toolkit.Uwp.UI.Controls</RootNamespace>
     <!-- ARM64 builds for managed apps use .NET Native. We can't use the Reflection Provider for that. -->
     <EnableTypeInfoReflection Condition="'$(Configuration)' == 'Debug'">false</EnableTypeInfoReflection>
+    <PackageProjectUrl>https://github.com/releaseops-svmx/WindowsCommunityToolkit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/releaseops-svmx/WindowsCommunityToolkit</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
