@@ -103,6 +103,15 @@
     <StaticResource x:Key="DataGridCellFocusVisualSecondaryBrush" ResourceKey="SystemControlFocusVisualSecondaryBrush"/>
     <StaticResource x:Key="DataGridCellInvalidBrush" ResourceKey="InvalidBrush"/>
 
+    <SolidColorBrush x:Key="SVMXCellErrorBorderColor" Color="#B30009"/>
+    <SolidColorBrush x:Key="SVMXCellErrorFillColor" Color="#2AB30009"/>
+    <StaticResource x:Key="SVMXCellErrorBorderBrush" ResourceKey="SVMXCellErrorBorderColor"/>
+    <StaticResource x:Key="SVMXCellErrorFillBrush" ResourceKey="SVMXCellErrorFillColor"/>
+    <SolidColorBrush x:Key="SVMXCellWarningBorderColor" Color="#F5CD00"/>
+    <SolidColorBrush x:Key="SVMXCellWarningFillColor" Color="#2AF5CD00"/>
+    <StaticResource x:Key="SVMXCellWarningBorderBrush" ResourceKey="SVMXCellWarningBorderColor"/>
+    <StaticResource x:Key="SVMXCellWarningFillBrush" ResourceKey="SVMXCellWarningFillColor"/>
+
     <Style TargetType="local:DataGrid">
         <Setter Property="DragIndicatorStyle">
             <Setter.Value>
@@ -500,6 +509,8 @@
                         <Rectangle x:Name="InvalidVisualElement" IsHitTestVisible="False" StrokeThickness="1" Stroke="{ThemeResource DataGridCellInvalidBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0"/>
 
                         <Rectangle x:Name="RightGridLine" Grid.Column="1" VerticalAlignment="Stretch" Width="1" Fill="{ThemeResource DataGridFillerColumnGridLinesBrush}"/>
+                        <Rectangle x:Name="SVMXValidationVisualErrorElement" IsHitTestVisible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stroke="{StaticResource SVMXCellErrorBorderBrush}" Fill="{StaticResource SVMXCellErrorFillBrush}" StrokeThickness="1" Opacity="0"/>
+                        <Rectangle x:Name="SVMXValidationVisualWarningElement" IsHitTestVisible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stroke="{StaticResource SVMXCellWarningBorderBrush}" Fill="{StaticResource SVMXCellWarningFillBrush}" StrokeThickness="1" Opacity="0"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

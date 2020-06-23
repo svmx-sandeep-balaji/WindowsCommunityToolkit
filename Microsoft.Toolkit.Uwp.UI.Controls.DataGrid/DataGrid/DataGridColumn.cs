@@ -59,6 +59,11 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         }
 
         /// <summary>
+        /// Gets or sets the value for column binding property name used for SVMX data validation purpose.
+        /// </summary>
+        public string SVMXBindingPropertyName { get; set; }
+
+        /// <summary>
         /// Gets the actual visible width after Width, MinWidth, and MaxWidth setting at the Column level and DataGrid level
         /// have been taken into account.
         /// </summary>

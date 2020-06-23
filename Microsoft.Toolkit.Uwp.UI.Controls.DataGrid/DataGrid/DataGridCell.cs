@@ -20,6 +20,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
     /// Represents an individual <see cref="DataGrid"/> cell.
     /// </summary>
     [TemplatePart(Name = DATAGRIDCELL_elementRightGridLine, Type = typeof(Rectangle))]
+    [TemplatePart(Name = DATAGRIDCELL_svmxValidationVisualErrorElement, Type = typeof(Rectangle))]
+    [TemplatePart(Name = DATAGRIDCELL_svmxValidationVisualWarningElement, Type = typeof(Rectangle))]
 
     [TemplateVisualState(Name = VisualStates.StateNormal, GroupName = VisualStates.GroupCommon)]
     [TemplateVisualState(Name = VisualStates.StatePointerOver, GroupName = VisualStates.GroupCommon)]
@@ -36,7 +38,23 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
     {
         private const string DATAGRIDCELL_elementRightGridLine = "RightGridLine";
 
+        private const string DATAGRIDCELL_svmxValidationVisualErrorElement = "SVMXValidationVisualErrorElement";
+        private const string DATAGRIDCELL_svmxValidationVisualWarningElement = "SVMXValidationVisualWarningElement";
+
+        /// <summary>
+        /// This returns the suffix value of warning opacity binding property name
+        /// </summary>
+        public const string SVMXDATAGridCell_WarningPropertySuffix = "_ValidationStatusWarningOpacity";
+
+        /// <summary>
+        /// This returns the suffix value of error opacity binding property name
+        /// </summary>
+        public const string SVMXDATAGridCell_ErrorPropertySuffix = "_ValidationStatusErrorOpacity";
+
         private Rectangle _rightGridLine;
+
+        private Rectangle _svmxValidationErrorRectangle;
+        private Rectangle _svmxValidationWarningRectangle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataGridCell"/> class.
@@ -158,10 +176,22 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
+        private DataGridColumn _owningColumn;
+
         internal DataGridColumn OwningColumn
         {
-            get;
-            set;
+            get
+            {
+                return _owningColumn;
+            }
+
+            set
+            {
+                _owningColumn = value;
+
+                // Whenever the owning column changes, update SVMXValidationVisualElement's binding accordingly
+                UpdateSVMXValidationVisualElementBinding();
+            }
         }
 
         internal DataGrid OwningGrid
@@ -228,6 +258,12 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             ApplyCellState(false /*animate*/);
 
             _rightGridLine = GetTemplateChild(DATAGRIDCELL_elementRightGridLine) as Rectangle;
+            _svmxValidationErrorRectangle = GetTemplateChild(DATAGRIDCELL_svmxValidationVisualErrorElement) as Rectangle;
+            _svmxValidationWarningRectangle = GetTemplateChild(DATAGRIDCELL_svmxValidationVisualWarningElement) as Rectangle;
+
+            // Update binding on _svmxValidationRectangle
+            UpdateSVMXValidationVisualElementBinding();
+
             if (_rightGridLine != null && this.OwningColumn == null)
             {
                 // Turn off the right GridLine for filler cells
@@ -465,6 +501,29 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
 
             this.IsPointerOver = isPointerOver;
+        }
+
+        // SVMX Data Validation Related code
+        private void UpdateSVMXValidationVisualElementBinding()
+        {
+            if (this.OwningColumn != null && !string.IsNullOrWhiteSpace(this.OwningColumn.SVMXBindingPropertyName) && _svmxValidationErrorRectangle != null)
+            {
+                // Update the binding for opacity of SVMXValidationVisualErrorElement
+                Windows.UI.Xaml.Data.Binding errorOpacityBinding = new Windows.UI.Xaml.Data.Binding();
+                errorOpacityBinding.Path = new PropertyPath(this.OwningColumn.SVMXBindingPropertyName + "_ValidationStatusErrorOpacity");
+                errorOpacityBinding.Mode = Windows.UI.Xaml.Data.BindingMode.OneWay;
+                errorOpacityBinding.FallbackValue = 0;
+
+                _svmxValidationErrorRectangle.SetBinding(OpacityProperty, errorOpacityBinding);
+
+                // Update the binding for opacity of SVMXValidationVisualWarningElement
+                Windows.UI.Xaml.Data.Binding warningOpacityBinding = new Windows.UI.Xaml.Data.Binding();
+                warningOpacityBinding.Path = new PropertyPath(this.OwningColumn.SVMXBindingPropertyName + "_ValidationStatusWarningOpacity");
+                warningOpacityBinding.Mode = Windows.UI.Xaml.Data.BindingMode.OneWay;
+                warningOpacityBinding.FallbackValue = 0;
+
+                _svmxValidationWarningRectangle.SetBinding(OpacityProperty, warningOpacityBinding);
+            }
         }
     }
 }
