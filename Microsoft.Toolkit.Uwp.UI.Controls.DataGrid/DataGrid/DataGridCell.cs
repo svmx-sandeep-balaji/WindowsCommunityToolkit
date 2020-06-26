@@ -191,6 +191,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
                 // Whenever the owning column changes, update SVMXValidationVisualElement's binding accordingly
                 UpdateSVMXValidationVisualElementBinding();
+
+                UpdateCellName();
             }
         }
 
@@ -212,10 +214,21 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
+        private DataGridRow _owningRow;
+
         internal DataGridRow OwningRow
         {
-            get;
-            set;
+            get
+            {
+                return _owningRow;
+            }
+
+            set
+            {
+                _owningRow = value;
+
+                UpdateCellName();
+            }
         }
 
         internal int RowIndex
@@ -523,6 +536,19 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 warningOpacityBinding.FallbackValue = 0;
 
                 _svmxValidationWarningRectangle.SetBinding(OpacityProperty, warningOpacityBinding);
+            }
+        }
+
+        // Update Name of the cell to enable us to find the reference to this cell from ReactNative code
+        private void UpdateCellName()
+        {
+            if (RowIndex > -1 && ColumnIndex > -1 && !string.IsNullOrWhiteSpace(OwningColumn.SVMXBindingPropertyName))
+            {
+                Name = RowIndex + "_" + ColumnIndex + "_" + OwningColumn.SVMXBindingPropertyName;
+            }
+            else
+            {
+                Name = string.Empty;
             }
         }
     }
