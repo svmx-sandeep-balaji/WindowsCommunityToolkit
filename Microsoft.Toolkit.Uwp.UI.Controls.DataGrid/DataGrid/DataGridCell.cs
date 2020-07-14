@@ -306,7 +306,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         internal void ApplyCellState(bool animate)
         {
-            if (this.OwningGrid == null || this.OwningColumn == null || this.OwningRow == null || this.OwningRow.Visibility == Visibility.Collapsed || this.OwningRow.Slot == -1)
+            // Ignore cell state change if KeepFocussed is set to true
+            if (this.OwningGrid == null || this.OwningColumn == null || this.OwningRow == null || this.OwningRow.Visibility == Visibility.Collapsed || this.OwningRow.Slot == -1 || this.KeepFocussed)
             {
                 return;
             }
@@ -561,5 +562,10 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         {
             VisualStates.GoToState(this, false, VisualStates.StateCurrentWithFocus, VisualStates.StateCurrent, VisualStates.StateRegular);
         }
+
+        /// <summary>
+        /// Gets or sets the value indicating whether SVMX property to keep the cell in focussed state
+        /// </summary>
+        public bool KeepFocussed { get; set; }
     }
 }
