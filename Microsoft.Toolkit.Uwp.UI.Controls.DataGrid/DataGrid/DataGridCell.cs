@@ -564,7 +564,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         }
 
         /// <summary>
-        /// Gets or sets the value indicating whether SVMX property to keep the cell in focussed state
+        /// Gets or sets a value indicating whether SVMX property is set to keep the cell in focussed state
         /// </summary>
         public bool KeepFocussed { get; set; }
     }
