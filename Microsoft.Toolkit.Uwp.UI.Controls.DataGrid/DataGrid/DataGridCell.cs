@@ -551,5 +551,15 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 Name = string.Empty;
             }
         }
+
+        // SVMX Related public functions
+
+        /// <summary>
+        /// Send the cell in VisualStates.StateCurrentWithFocus state
+        /// </summary>
+        public void FocusHiglightCell()
+        {
+            VisualStates.GoToState(this, false, VisualStates.StateCurrentWithFocus, VisualStates.StateCurrent, VisualStates.StateRegular);
+        }
     }
 }
