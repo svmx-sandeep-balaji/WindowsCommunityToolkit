@@ -390,6 +390,13 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 {
                     _rightGridLine.Visibility = newVisibility;
                 }
+
+                // SVMX option to always show vertical grid line for the last frozen column
+                DataGridColumn lastFrozenColumn = this.OwningGrid.ColumnsInternal.LastFrozenColumn;
+                if (this.OwningColumn != null && lastFrozenColumn != null && this.OwningColumn == lastFrozenColumn)
+                {
+                    _rightGridLine.Visibility = Visibility.Visible;
+                }
             }
         }
 

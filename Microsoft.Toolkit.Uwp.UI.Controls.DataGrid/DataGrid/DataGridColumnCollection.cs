@@ -101,6 +101,14 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
+        internal DataGridColumn LastFrozenColumn
+        {
+            get
+            {
+                return GetLastColumn(true /*isVisible*/, true /*isFrozen*/, null /*isReadOnly*/);
+            }
+        }
+
         internal DataGridColumn LastVisibleScrollingColumn
         {
             get
