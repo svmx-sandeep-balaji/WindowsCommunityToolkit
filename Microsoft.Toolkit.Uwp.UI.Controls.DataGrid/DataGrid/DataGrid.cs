@@ -8625,6 +8625,12 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 return true;
             }
 
+            // SVMX fix to allow multiple selection without the need of pressing Ctrl
+            if (this.SelectionMode == DataGridSelectionMode.Extended && !shift)
+            {
+                ctrl = true;
+            }
+
             try
             {
                 _noSelectionChangeCount++;
