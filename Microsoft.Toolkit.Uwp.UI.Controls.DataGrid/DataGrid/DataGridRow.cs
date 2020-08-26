@@ -1074,6 +1074,17 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         // DataGrid.RowBackground or DataGrid.AlternatingRowBackground
         internal void EnsureBackground()
         {
+            EnsureBackgroundActual(true);
+        }
+
+        internal void EnsureBackgroundActual(bool raiseEvent = false)
+        {
+            DataGridRow companionRow = GetCompanionRow();
+            if (companionRow != null && raiseEvent)
+            {
+                companionRow.EnsureBackgroundActual();
+            }
+
             // Inherit the DataGrid's RowBackground properties only if this row doesn't explicity have a background set
             if (this.RootElement != null && this.OwningGrid != null)
             {
@@ -1506,14 +1517,44 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
-        private void UpdateIsPointerOver(bool isPointerOver)
+        internal void UpdateIsPointerOverActual(bool isPointerOver, bool raiseEvent = false)
         {
+            DataGridRow companionRow = GetCompanionRow();
+            if (companionRow != null && raiseEvent)
+            {
+                companionRow.UpdateIsPointerOverActual(isPointerOver);
+            }
+
             if (this.InteractionInfo != null && this.InteractionInfo.CapturedPointerId != 0u)
             {
                 return;
             }
 
             this.IsPointerOver = isPointerOver;
+        }
+
+        private void UpdateIsPointerOver(bool isPointerOver)
+        {
+            UpdateIsPointerOverActual(isPointerOver, true);
+        }
+
+        private DataGridRow GetCompanionRow()
+        {
+            DataGridRow companionRow = null;
+            if (this.OwningGrid.CompanionGrid != null)
+            {
+                var companionGrid = this.OwningGrid.CompanionGrid;
+                var allRows = companionGrid.GetAllRows();
+                foreach (DataGridRow row in allRows)
+                {
+                    if (row.Index == this.Index)
+                    {
+                        companionRow = row;
+                        break;
+                    }
+                }
+            }
+            return companionRow;
         }
 
 #if DEBUG

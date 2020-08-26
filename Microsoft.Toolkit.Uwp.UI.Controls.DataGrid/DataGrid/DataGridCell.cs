@@ -333,7 +333,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
 
             // CurrentStates
-            if (this.IsCurrent && !this.OwningGrid.ColumnHeaderHasFocus)
+            if (this.IsCurrent && !this.OwningGrid.ColumnHeaderHasFocus && !this.OwningGrid.ShouldHideCellBorder)
             {
                 if (this.OwningGrid.ContainsFocus)
                 {
