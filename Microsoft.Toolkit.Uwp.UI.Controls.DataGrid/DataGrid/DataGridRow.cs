@@ -1554,6 +1554,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                     }
                 }
             }
+
             return companionRow;
         }
 

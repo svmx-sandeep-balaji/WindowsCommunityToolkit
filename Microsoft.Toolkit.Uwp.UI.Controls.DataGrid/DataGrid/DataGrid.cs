@@ -147,7 +147,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         private DataGridColumnHeadersPresenter _columnHeadersPresenter;
         private ScrollBar _hScrollBar;
         private DataGridRowsPresenter _rowsPresenter;
-        internal ScrollBar _vScrollBar;
+        private ScrollBar _vScrollBar;
 
         private byte _autoGeneratingColumnOperationCount;
         private bool _autoSizingColumns;
@@ -3885,19 +3885,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
-        /// <summary>
-        /// Raises the Grid Scroll event (SVMX)
-        /// </summary>
-        /// <param name="e"> DataGridScrollEventArgs </param>
-        internal virtual void OnGridScroll(DataGridScrollEventArgs e)
-        {
-            EventHandler<DataGridScrollEventArgs> handler = this.GridScroll;
-            if (handler != null)
-            {
-                handler(this, e);
-            }
-        }
-
         internal static DataGridCell GetOwningCell(FrameworkElement element)
         {
             Debug.Assert(element != null, "Expected non-null element.");
@@ -3909,6 +3896,19 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
 
             return cell;
+        }
+
+        /// <summary>
+        /// Raises the Grid Scroll event (SVMX)
+        /// </summary>
+        /// <param name="e"> DataGridScrollEventArgs </param>
+        internal virtual void OnGridScroll(DataGridScrollEventArgs e)
+        {
+            EventHandler<DataGridScrollEventArgs> handler = this.GridScroll;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
         }
 
         /// <summary>
@@ -4195,6 +4195,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 {
                     this.OnGridScroll(new DataGridScrollEventArgs(offsetDelta, isForHorizontalScroll));
                 }
+
                 if (isForHorizontalScroll)
                 {
                     double newHorizontalOffset = this.HorizontalOffset + offsetDelta;
@@ -9237,7 +9238,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 if (this.CompanionGrid._vScrollBar.Visibility == Visibility.Collapsed)
                 {
                     this.CompanionGrid._vScrollBar = this._vScrollBar;
-                    // this.CompanionGrid._vScrollBar.Opacity = 0;
                 }
 
                 this.CompanionGrid.VerticalScrollBar_ScrollActual(sender, e);
