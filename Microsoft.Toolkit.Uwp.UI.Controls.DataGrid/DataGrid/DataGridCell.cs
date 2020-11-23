@@ -376,6 +376,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         {
             if (this.OwningGrid != null && _rightGridLine != null)
             {
+                /*
                 if (!(this.OwningColumn is DataGridFillerColumn) && this.OwningGrid.VerticalGridLinesBrush != null && this.OwningGrid.VerticalGridLinesBrush != _rightGridLine.Fill)
                 {
                     _rightGridLine.Fill = this.OwningGrid.VerticalGridLinesBrush;
@@ -390,13 +391,16 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 {
                     _rightGridLine.Visibility = newVisibility;
                 }
+                */
+                _rightGridLine.Visibility = Visibility.Collapsed;
 
                 // SVMX option to always show vertical grid line for the last frozen column
-                // DataGridColumn lastFrozenColumn = this.OwningGrid.ColumnsInternal.LastFrozenColumn;
-                // if (this.OwningColumn != null && lastFrozenColumn != null && this.OwningColumn == lastFrozenColumn)
-                // {
-                //    _rightGridLine.Visibility = Visibility.Visible;
-                // }
+                DataGridColumn lastFrozenColumn = this.OwningGrid.ColumnsInternal.LastFrozenColumn;
+                if (this.OwningColumn != null && lastFrozenColumn != null && this.OwningColumn == lastFrozenColumn && this.OwningColumn != lastVisibleColumn)
+                {
+                    _rightGridLine.Fill = this.OwningGrid.VerticalGridLinesBrush;
+                    _rightGridLine.Visibility = Visibility.Visible;
+                }
             }
         }
 
