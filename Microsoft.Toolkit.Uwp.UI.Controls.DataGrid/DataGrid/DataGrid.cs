@@ -398,11 +398,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         public event EventHandler<DataGridRowDetailsEventArgs> UnloadingRowDetails;
 
         /// <summary>
-        /// Occurs when the grid scrolls
-        /// </summary>
-        public event EventHandler<DataGridScrollEventArgs> GridScroll;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DataGrid"/> class.
         /// </summary>
         public DataGrid()
@@ -1004,6 +999,43 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
             dataGrid.InvalidateColumnHeadersArrange();
             dataGrid.InvalidateCellsArrange();
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether last column is frozen to right.
+        /// </summary>
+        public bool RightFrozenColumnEnabled
+        {
+            get { return (bool)GetValue(RightFrozenColumnEnabledProperty); }
+            set { SetValue(RightFrozenColumnEnabledProperty, value); }
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="RightFrozenColumnEnabled"/>
+        /// dependency property.
+        /// </summary>
+        public static readonly DependencyProperty RightFrozenColumnEnabledProperty =
+            DependencyProperty.Register(
+                "RightFrozenColumnEnabled",
+                typeof(bool),
+                typeof(DataGrid),
+                new PropertyMetadata(false, OnRightFrozenColumnEnabledPropertyChanged));
+
+        private static void OnRightFrozenColumnEnabledPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            DataGrid dataGrid = d as DataGrid;
+            if (!dataGrid.IsHandlerSuspended(e.Property))
+            {
+                ProcessRightFrozenColumnEnabled(dataGrid);
+            }
+        }
+
+        private static void ProcessRightFrozenColumnEnabled(DataGrid dataGrid)
+        {
+            dataGrid.InvalidateRowsArrange();
+            dataGrid.InvalidateRowsMeasure(true);
+            dataGrid.InvalidateColumnHeadersArrange();
+            dataGrid.InvalidateArrange();
         }
 
         /// <summary>
@@ -2341,11 +2373,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         }
 
         /// <summary>
-        /// Gets or Sets the SVMX Property used to make another grid act like pinned columns to the right
-        /// </summary>
-        public DataGrid CompanionGrid { get; set; }
-
-        /// <summary>
         /// Gets or Sets a value indicating whether the cell border should be hidden when selected
         /// </summary>
         public bool ShouldHideCellBorder { get; set; }
@@ -3289,12 +3316,20 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
             if (this.ActualWidth != finalSize.Width)
             {
+                this.ArrangeOverrideWidth = finalSize.Width;
+
                 // If our final width has changed, we might need to update the filler
                 InvalidateColumnHeadersArrange();
                 InvalidateCellsArrange();
             }
 
             return base.ArrangeOverride(finalSize);
+        }
+
+        internal double ArrangeOverrideWidth
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -3899,19 +3934,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         }
 
         /// <summary>
-        /// Raises the Grid Scroll event (SVMX)
-        /// </summary>
-        /// <param name="e"> DataGridScrollEventArgs </param>
-        internal virtual void OnGridScroll(DataGridScrollEventArgs e)
-        {
-            EventHandler<DataGridScrollEventArgs> handler = this.GridScroll;
-            if (handler != null)
-            {
-                handler(this, e);
-            }
-        }
-
-        /// <summary>
         /// Cancels editing mode for the specified DataGridEditingUnit and restores its original value.
         /// </summary>
         /// <param name="editingUnit">Specifies whether to cancel edit for a Cell or Row.</param>
@@ -4187,15 +4209,10 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             return this.ProcessRightKey(shift, ctrl);
         }
 
-        internal bool ProcessScrollOffsetDeltaActual(double offsetDelta, bool isForHorizontalScroll, bool raiseScrollEvent = false)
+        internal bool ProcessScrollOffsetDelta(double offsetDelta, bool isForHorizontalScroll)
         {
             if (this.IsEnabled && this.DisplayData.NumDisplayedScrollingElements > 0)
             {
-                if (raiseScrollEvent)
-                {
-                    this.OnGridScroll(new DataGridScrollEventArgs(offsetDelta, isForHorizontalScroll));
-                }
-
                 if (isForHorizontalScroll)
                 {
                     double newHorizontalOffset = this.HorizontalOffset + offsetDelta;
@@ -4245,11 +4262,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
 
             return false;
-        }
-
-        internal bool ProcessScrollOffsetDelta(double offsetDelta, bool isForHorizontalScroll)
-        {
-            return ProcessScrollOffsetDeltaActual(offsetDelta, isForHorizontalScroll, true);
         }
 
         /// <summary>
@@ -9228,21 +9240,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void VerticalScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
-            VerticalScrollBar_ScrollActual(sender, e, true);
-        }
-
-        internal void VerticalScrollBar_ScrollActual(object sender, ScrollEventArgs e, bool raiseEvent = false)
-        {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                if (this.CompanionGrid._vScrollBar.Visibility == Visibility.Collapsed)
-                {
-                    this.CompanionGrid._vScrollBar = this._vScrollBar;
-                }
-
-                this.CompanionGrid.VerticalScrollBar_ScrollActual(sender, e);
-            }
-
             ProcessVerticalScroll(e.ScrollEventType);
         }
     }

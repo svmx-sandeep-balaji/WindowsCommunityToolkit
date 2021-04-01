@@ -140,8 +140,27 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             double dragIndicatorLeftEdge = 0;
             double frozenLeftEdge = 0;
             double scrollingLeftEdge = -this.OwningGrid.HorizontalOffset;
+            double gridWidth = this.OwningGrid.ArrangeOverrideWidth;
+            bool isRightFrozenColumnEnabled = this.OwningGrid.RightFrozenColumnEnabled;
+            DataGridColumn lastColumn = this.OwningGrid.ColumnsInternal.GetLastColumn(null, null, null);
+            double lastColumnWidth = isRightFrozenColumnEnabled && lastColumn != null ? lastColumn.ActualWidth : 0;
+
+            if (isRightFrozenColumnEnabled && lastColumn != null)
+            {
+                DataGridColumnHeader columnHeader = lastColumn.HeaderCell;
+                Debug.Assert(columnHeader.OwningColumn == lastColumn, "Expected columnHeader owned by dataGridColumn.");
+
+                columnHeader.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth, finalSize.Height));
+                columnHeader.Clip = null; // The layout system could have clipped this because it's not aware of our render transform
+            }
+
             foreach (DataGridColumn dataGridColumn in this.OwningGrid.ColumnsInternal.GetVisibleColumns())
             {
+                if (dataGridColumn == lastColumn && isRightFrozenColumnEnabled)
+                {
+                    continue;
+                }
+
                 DataGridColumnHeader columnHeader = dataGridColumn.HeaderCell;
                 Debug.Assert(columnHeader.OwningColumn == dataGridColumn, "Expected columnHeader owned by dataGridColumn.");
 
@@ -159,7 +178,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 else
                 {
                     columnHeader.Arrange(new Rect(scrollingLeftEdge, 0, dataGridColumn.LayoutRoundedWidth, finalSize.Height));
-                    EnsureColumnHeaderClip(columnHeader, dataGridColumn.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge);
+                    EnsureColumnHeaderClipNew(columnHeader, dataGridColumn.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth);
                     if (this.DragColumn == dataGridColumn && this.DragIndicator != null)
                     {
                         dragIndicatorLeftEdge = scrollingLeftEdge + this.DragIndicatorOffset;
@@ -221,6 +240,31 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             else
             {
                 columnHeader.Clip = null;
+            }
+        }
+
+        private static void EnsureColumnHeaderClipNew(DataGridColumnHeader columnHeader, double width, double height, double frozenLeftEdge, double columnHeaderLeftEdge, double frozenRightEdge)
+        {
+            // Clip the cell only if it's scrolled under frozen columns.  Unfortunately, we need to clip in this case
+            // because cells could be transparent
+            if (frozenLeftEdge > columnHeaderLeftEdge)
+            {
+                RectangleGeometry rg = new RectangleGeometry();
+                double xClip = Math.Min(width, frozenLeftEdge - columnHeaderLeftEdge);
+                rg.Rect = new Rect(xClip, 0, width - xClip, height);
+                columnHeader.Clip = rg;
+            }
+            else
+            {
+                columnHeader.Clip = null;
+            }
+
+            if (columnHeaderLeftEdge + width > frozenRightEdge)
+            {
+                RectangleGeometry rg = new RectangleGeometry();
+                double xClip = columnHeaderLeftEdge + width - frozenRightEdge;
+                rg.Rect = new Rect(0, 0, Math.Max(0, width - xClip), height);
+                columnHeader.Clip = rg;
             }
         }
 

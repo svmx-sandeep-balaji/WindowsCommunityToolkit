@@ -218,13 +218,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
         /// Clears the entire selection. Displayed rows are deselected explicitly to visualize
         /// potential transition effects
         /// </summary>
-        internal void ClearRowSelectionActual(bool resetAnchorSlot, bool raiseEvent = false)
+        internal void ClearRowSelection(bool resetAnchorSlot)
         {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.ClearRowSelectionActual(resetAnchorSlot);
-            }
-
             if (resetAnchorSlot)
             {
                 this.AnchorSlot = -1;
@@ -260,22 +255,12 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
-        internal void ClearRowSelection(bool resetAnchorSlot)
-        {
-            ClearRowSelectionActual(resetAnchorSlot, true);
-        }
-
         /// <summary>
         /// Clears the entire selection except the indicated row. Displayed rows are deselected explicitly to
         /// visualize potential transition effects. The row indicated is selected if it is not already.
         /// </summary>
-        internal void ClearRowSelectionActual(int slotException, bool setAnchorSlot, bool raiseEvent = false)
+        internal void ClearRowSelection(int slotException, bool setAnchorSlot)
         {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.ClearRowSelectionActual(slotException, setAnchorSlot);
-            }
-
             _noSelectionChangeCount++;
             try
             {
@@ -335,11 +320,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             {
                 this.NoSelectionChangeCount--;
             }
-        }
-
-        internal void ClearRowSelection(int slotException, bool setAnchorSlot)
-        {
-            ClearRowSelectionActual(slotException, setAnchorSlot, true);
         }
 
         internal int GetCollapsedSlotCount(int startSlot, int endSlot)
@@ -649,16 +629,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         internal bool ScrollSlotIntoView(int slot, bool scrolledHorizontally)
         {
-            return ScrollSlotIntoViewActual(slot, scrolledHorizontally, true);
-        }
-
-        internal bool ScrollSlotIntoViewActual(int slot, bool scrolledHorizontally, bool raiseEvent = false)
-        {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.ScrollSlotIntoViewActual(slot, scrolledHorizontally);
-            }
-
             Debug.Assert(_collapsedSlotsTable.Contains(slot) || !IsSlotOutOfBounds(slot), "Expected _collapsedSlotsTable.Contains(slot) is true or IsSlotOutOfBounds(slot) is false.");
 
             if (scrolledHorizontally && this.DisplayData.FirstScrollingSlot <= slot && this.DisplayData.LastScrollingSlot >= slot)
@@ -785,13 +755,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             return true;
         }
 
-        internal void SetRowSelectionActual(int slot, bool isSelected, bool setAnchorSlot, bool raiseEvent = false)
+        internal void SetRowSelection(int slot, bool isSelected, bool setAnchorSlot)
         {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.SetRowSelectionActual(slot, isSelected, setAnchorSlot);
-            }
-
             Debug.Assert(isSelected || !setAnchorSlot, "Expected isSelected is true or setAnchorSlot is false.");
             Debug.Assert(!IsSlotOutOfSelectionBounds(slot), "Expected IsSlotOutOfSelectionBounds(slot) is false.");
             _noSelectionChangeCount++;
@@ -828,18 +793,9 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             }
         }
 
-        internal void SetRowSelection(int slot, bool isSelected, bool setAnchorSlot)
+        // For now, all scenarios are for isSelected == true.
+        internal void SetRowsSelection(int startSlot, int endSlot, bool isSelected = true)
         {
-            SetRowSelectionActual(slot, isSelected, setAnchorSlot, true);
-        }
-
-        internal void SetRowsSelectionActual(int startSlot, int endSlot, bool isSelected = true, bool raiseEvent = false)
-        {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.SetRowsSelectionActual(startSlot, endSlot, isSelected);
-            }
-
             Debug.Assert(startSlot >= 0, "Expected startSlot is positive.");
             Debug.Assert(startSlot < this.SlotCount, "Expected startSlot is smaller than SlotCount.");
             Debug.Assert(endSlot >= 0, "Expected endSlot is positive.");
@@ -860,12 +816,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
             {
                 this.NoSelectionChangeCount--;
             }
-        }
-
-        // For now, all scenarios are for isSelected == true.
-        internal void SetRowsSelection(int startSlot, int endSlot, bool isSelected = true)
-        {
-            SetRowsSelectionActual(startSlot, endSlot, isSelected, true);
         }
 
         internal int SlotFromRowIndex(int rowIndex)
@@ -1423,7 +1373,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
                 raiseNotification);
         }
 
-        internal IEnumerable<DataGridRow> GetAllRows()
+        private IEnumerable<DataGridRow> GetAllRows()
         {
             if (_rowsPresenter != null)
             {
@@ -3131,16 +3081,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void SelectSlot(int slot, bool isSelected)
         {
-            SelectSlotActual(slot, isSelected, true);
-        }
-
-        internal void SelectSlotActual(int slot, bool isSelected, bool raiseEvent = false)
-        {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.SelectSlotActual(slot, isSelected);
-            }
-
             _selectedItems.SelectSlot(slot, isSelected);
             if (this.IsSlotVisible(slot))
             {
@@ -3150,16 +3090,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void SelectSlots(int startSlot, int endSlot, bool isSelected)
         {
-            SelectSlotsActual(startSlot, endSlot, isSelected, true);
-        }
-
-        internal void SelectSlotsActual(int startSlot, int endSlot, bool isSelected, bool raiseEvent = false)
-        {
-            if (this.CompanionGrid != null && raiseEvent)
-            {
-                this.CompanionGrid.SelectSlotsActual(startSlot, endSlot, isSelected);
-            }
-
             _selectedItems.SelectSlots(startSlot, endSlot, isSelected);
 
             // Apply the correct row state for display rows and also expand or collapse detail accordingly
@@ -3634,16 +3564,6 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls
 
         private void UpdateTablesForRemoval(int slotDeleted, object itemDeleted)
         {
-            UpdateTablesForRemovalActual(slotDeleted, itemDeleted, true);
-        }
-
-        internal void UpdateTablesForRemovalActual(int slotDeleted, object itemDeleted, bool raiseEvent = false)
-        {
-            if (raiseEvent && this.CompanionGrid != null)
-            {
-                this.CompanionGrid.UpdateTablesForRemovalActual(slotDeleted, itemDeleted);
-            }
-
             if (this.RowGroupHeadersTable.Contains(slotDeleted))
             {
                 // A RowGroupHeader was removed

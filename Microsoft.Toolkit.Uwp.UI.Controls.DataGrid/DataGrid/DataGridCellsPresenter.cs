@@ -76,8 +76,29 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             double scrollingLeftEdge = -this.OwningGrid.HorizontalOffset;
 
             double cellLeftEdge;
+            double gridWidth = this.OwningGrid.ArrangeOverrideWidth;
+
+            bool isRightFrozenColumnEnabled = this.OwningGrid.RightFrozenColumnEnabled;
+            DataGridColumn lastColumn = this.OwningGrid.ColumnsInternal.GetLastColumn(null, null, null);
+            double lastColumnWidth = isRightFrozenColumnEnabled && lastColumn != null ? lastColumn.ActualWidth : 0;
+
+            if (isRightFrozenColumnEnabled && lastColumn != null)
+            {
+                DataGridCell cell = this.OwningRow.Cells[lastColumn.Index];
+                Debug.Assert(cell.OwningColumn == lastColumn, "Expected column owner.");
+                Debug.Assert(lastColumn.IsVisible, "Expected visible column.");
+
+                cell.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth, finalSize.Height));
+                lastColumn.IsInitialDesiredWidthDetermined = true;
+            }
+
             foreach (DataGridColumn column in this.OwningGrid.ColumnsInternal.GetVisibleColumns())
             {
+                if (column == lastColumn && isRightFrozenColumnEnabled)
+                {
+                    continue;
+                }
+
                 DataGridCell cell = this.OwningRow.Cells[column.Index];
                 Debug.Assert(cell.OwningColumn == column, "Expected column owner.");
                 Debug.Assert(column.IsVisible, "Expected visible column.");
@@ -97,7 +118,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 if (cell.Visibility == Visibility.Visible)
                 {
                     cell.Arrange(new Rect(cellLeftEdge, 0, column.LayoutRoundedWidth, finalSize.Height));
-                    EnsureCellClip(cell, column.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge);
+                    EnsureCellClipNew(cell, column.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth);
                 }
 
                 scrollingLeftEdge += column.ActualWidth;
@@ -129,6 +150,31 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             }
         }
 
+        private static void EnsureCellClipNew(DataGridCell cell, double width, double height, double frozenLeftEdge, double cellLeftEdge, double frozenRightEdge)
+        {
+            // Clip the cell only if it's scrolled under frozen columns.  Unfortunately, we need to clip in this case
+            // because cells could be transparent
+            if (!cell.OwningColumn.IsFrozen && frozenLeftEdge > cellLeftEdge)
+            {
+                RectangleGeometry rg = new RectangleGeometry();
+                double xClip = Math.Round(Math.Min(width, frozenLeftEdge - cellLeftEdge));
+                rg.Rect = new Rect(xClip, 0, Math.Max(0, width - xClip), height);
+                cell.Clip = rg;
+            }
+            else
+            {
+                cell.Clip = null;
+            }
+
+            if (!cell.OwningColumn.IsFrozen && cellLeftEdge + width > frozenRightEdge)
+            {
+                RectangleGeometry rg = new RectangleGeometry();
+                double xClip = cellLeftEdge + width - frozenRightEdge;
+                rg.Rect = new Rect(0, 0, Math.Max(0, width - xClip), height);
+                cell.Clip = rg;
+            }
+        }
+
         private static void EnsureCellDisplay(DataGridCell cell, bool displayColumn)
         {
             if (cell.IsCurrent)
@@ -149,6 +195,14 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             else
             {
                 cell.Visibility = displayColumn ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            bool isRightFrozenColumnEnabled = cell.OwningGrid.RightFrozenColumnEnabled;
+            DataGridColumn lastColumn = cell.OwningGrid.ColumnsInternal.GetLastColumn(null, null, null);
+            if (cell.OwningColumn == lastColumn && isRightFrozenColumnEnabled)
+            {
+                cell.Visibility = Visibility.Visible;
+                cell.Clip = null;
             }
         }
 
@@ -219,6 +273,17 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
 
                 // Measure the entire first row to make the horizontal scrollbar more accurate
                 bool shouldDisplayCell = ShouldDisplayCell(column, frozenLeftEdge, scrollingLeftEdge) || this.OwningRow.Index == 0;
+
+                // Special handling for right frozen column
+                bool isRightFrozenColumnEnabled = this.OwningGrid.RightFrozenColumnEnabled;
+                DataGridColumn lastColumn = this.OwningGrid.ColumnsInternal.GetLastColumn(null, null, null);
+
+                if (isRightFrozenColumnEnabled && lastColumn != null)
+                {
+                    // Always display right frozen cell
+                    shouldDisplayCell = true;
+                }
+
                 EnsureCellDisplay(cell, shouldDisplayCell);
                 if (shouldDisplayCell)
                 {
