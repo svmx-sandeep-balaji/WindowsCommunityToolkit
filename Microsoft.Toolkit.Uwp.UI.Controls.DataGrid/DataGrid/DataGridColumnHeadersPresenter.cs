@@ -178,7 +178,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 else
                 {
                     columnHeader.Arrange(new Rect(scrollingLeftEdge, 0, dataGridColumn.LayoutRoundedWidth, finalSize.Height));
-                    EnsureColumnHeaderClipNew(columnHeader, dataGridColumn.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth);
+                    EnsureColumnHeaderClipNew(columnHeader, dataGridColumn.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth, isRightFrozenColumnEnabled);
                     if (this.DragColumn == dataGridColumn && this.DragIndicator != null)
                     {
                         dragIndicatorLeftEdge = scrollingLeftEdge + this.DragIndicatorOffset;
@@ -243,7 +243,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             }
         }
 
-        private static void EnsureColumnHeaderClipNew(DataGridColumnHeader columnHeader, double width, double height, double frozenLeftEdge, double columnHeaderLeftEdge, double frozenRightEdge)
+        private static void EnsureColumnHeaderClipNew(DataGridColumnHeader columnHeader, double width, double height, double frozenLeftEdge, double columnHeaderLeftEdge, double frozenRightEdge, bool hasRightFrozenColumn)
         {
             // Clip the cell only if it's scrolled under frozen columns.  Unfortunately, we need to clip in this case
             // because cells could be transparent
@@ -259,7 +259,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 columnHeader.Clip = null;
             }
 
-            if (columnHeaderLeftEdge + width > frozenRightEdge)
+            if (hasRightFrozenColumn && columnHeaderLeftEdge + width - frozenLeftEdge > frozenRightEdge)
             {
                 RectangleGeometry rg = new RectangleGeometry();
                 double xClip = columnHeaderLeftEdge + width - frozenRightEdge;

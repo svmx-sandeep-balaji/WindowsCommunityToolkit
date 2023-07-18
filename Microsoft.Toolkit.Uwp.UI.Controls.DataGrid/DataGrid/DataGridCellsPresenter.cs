@@ -88,7 +88,8 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 Debug.Assert(cell.OwningColumn == lastColumn, "Expected column owner.");
                 Debug.Assert(lastColumn.IsVisible, "Expected visible column.");
 
-                cell.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth, finalSize.Height));
+                 cell.Background = new SolidColorBrush(Windows.UI.Colors.White);
++                cell.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth + 2, finalSize.Height));
                 lastColumn.IsInitialDesiredWidthDetermined = true;
             }
 
@@ -118,7 +119,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 if (cell.Visibility == Visibility.Visible)
                 {
                     cell.Arrange(new Rect(cellLeftEdge, 0, column.LayoutRoundedWidth, finalSize.Height));
-                    EnsureCellClipNew(cell, column.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth);
+                    EnsureCellClipNew(cell, column.ActualWidth, finalSize.Height, frozenLeftEdge, scrollingLeftEdge, gridWidth - lastColumnWidth, isRightFrozenColumnEnabled);
                 }
 
                 scrollingLeftEdge += column.ActualWidth;
@@ -150,7 +151,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
             }
         }
 
-        private static void EnsureCellClipNew(DataGridCell cell, double width, double height, double frozenLeftEdge, double cellLeftEdge, double frozenRightEdge)
+        private static void EnsureCellClipNew(DataGridCell cell, double width, double height, double frozenLeftEdge, double cellLeftEdge, double frozenRightEdge, bool hasRightFrozenColumn)
         {
             // Clip the cell only if it's scrolled under frozen columns.  Unfortunately, we need to clip in this case
             // because cells could be transparent
@@ -166,7 +167,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 cell.Clip = null;
             }
 
-            if (!cell.OwningColumn.IsFrozen && cellLeftEdge + width > frozenRightEdge)
+            if (hasRightFrozenColumn && !cell.OwningColumn.IsFrozen && cellLeftEdge + width - frozenLeftEdge> frozenRightEdge)
             {
                 RectangleGeometry rg = new RectangleGeometry();
                 double xClip = cellLeftEdge + width - frozenRightEdge;
