@@ -89,7 +89,7 @@ namespace Microsoft.Toolkit.Uwp.UI.Controls.Primitives
                 Debug.Assert(lastColumn.IsVisible, "Expected visible column.");
 
                  cell.Background = new SolidColorBrush(Windows.UI.Colors.White);
-+                cell.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth + 2, finalSize.Height));
+                 cell.Arrange(new Rect(gridWidth - lastColumnWidth, 0, lastColumn.LayoutRoundedWidth + 2, finalSize.Height));
                 lastColumn.IsInitialDesiredWidthDetermined = true;
             }
 
